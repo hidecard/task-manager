@@ -1,32 +1,38 @@
-import TaskForm from "./components/TaskForm";
-import TaskList from "./components/TaskList";
-import { Provider } from "react-redux";
-import store from "./redux/store";
-import { UserProvider, useUser } from "./context/UserContext";
+import { useState, useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+import { addTodo } from './todoSlice';
+import TodoList from './components/TodoList';
+import ThemeToggle from './components/ThemeToggle';
+import { useTheme } from './ThemeContext';
 
-const RoleSwitcher = () => {
-  const { role, setRole } = useUser();
+function App() {
+  const [todos, setTodos] = useState([]);
+  const { theme } = useTheme();
+  const dispatch = useDispatch();
+
+  // Load todos from localStorage on mount
+  useEffect(() => {
+    const savedTodos = localStorage.getItem('todos');
+    if (savedTodos) {
+      const parsedTodos = JSON.parse(savedTodos);
+      setTodos(parsedTodos);
+      // Sync with Redux store
+      parsedTodos.forEach((todo) => dispatch(addTodo(todo)));
+    }
+  }, [dispatch]);
+
+  // Save todos to localStorage whenever todos change
+  useEffect(() => {
+    localStorage.setItem('todos', JSON.stringify(todos));
+  }, [todos]);
+
   return (
-    <div className="mb-4">
-      <span className="mr-2">Current Role: <strong>{role}</strong></span>
-      <button onClick={() => setRole(role === "user" ? "admin" : "user")} className="px-2 py-1 bg-gray-500 text-white rounded text-sm">Switch Role</button>
+    <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-gray-100 text-black'} p-4`}>
+      <h1 className="text-3xl font-bold text-center mb-4">Todo List App</h1>
+      <ThemeToggle />
+      <TodoList todos={todos} setTodos={setTodos} />
     </div>
   );
-};
-
-const App = () => {
-  return (
-    <Provider store={store}>
-      <UserProvider>
-        <div className="max-w-xl mx-auto mt-10 p-6 bg-white shadow rounded">
-          <h1 className="text-3xl font-bold mb-6 text-center">Task Manager</h1>
-          <RoleSwitcher />
-          <TaskForm />
-          <TaskList />
-        </div>
-      </UserProvider>
-    </Provider>
-  );
-};
+}
 
 export default App;
