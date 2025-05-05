@@ -1,35 +1,32 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import TaskForm from "./components/TaskForm";
+import TaskList from "./components/TaskList";
+import { Provider } from "react-redux";
+import store from "./redux/store";
+import { UserProvider, useUser } from "./context/UserContext";
 
-function App() {
-  const [count, setCount] = useState(0)
-
+const RoleSwitcher = () => {
+  const { role, setRole } = useUser();
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    <div className="mb-4">
+      <span className="mr-2">Current Role: <strong>{role}</strong></span>
+      <button onClick={() => setRole(role === "user" ? "admin" : "user")} className="px-2 py-1 bg-gray-500 text-white rounded text-sm">Switch Role</button>
+    </div>
+  );
+};
 
-export default App
+const App = () => {
+  return (
+    <Provider store={store}>
+      <UserProvider>
+        <div className="max-w-xl mx-auto mt-10 p-6 bg-white shadow rounded">
+          <h1 className="text-3xl font-bold mb-6 text-center">Task Manager</h1>
+          <RoleSwitcher />
+          <TaskForm />
+          <TaskList />
+        </div>
+      </UserProvider>
+    </Provider>
+  );
+};
+
+export default App;
